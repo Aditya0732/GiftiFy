@@ -49,12 +49,12 @@ export async function POST(req) {
           eventVenue={venue}
           recipientName={guest.name}
           isRegistered={guest.registered}
-          registrationUrl="http://localhost:3000"
+          registrationUrl="https://giftify-eta.vercel.app"
         />
       );
       console.log("mail:",guest.email);
       const response = await resend.emails.send({
-        from: 'Giftify <onboarding@resend.dev>',
+        from: 'Giftify <noreply@aditya.domain.com>',
         to: guest.email,
         subject: `You're invited to ${name}! 🎉`,
         html: emailHtml,

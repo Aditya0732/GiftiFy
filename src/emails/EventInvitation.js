@@ -42,7 +42,7 @@ export const EventInvitation = ({
                 </Text>
                 <Section style={buttonContainer}>
                     <Button
-                        href={`http://localhost:3000`}
+                        href={`https://giftify-eta.vercel.app/`}
                         style={button}
                     >
                         View Event Details

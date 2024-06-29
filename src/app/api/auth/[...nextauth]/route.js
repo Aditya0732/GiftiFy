@@ -34,6 +34,7 @@ const authOptions = {
       return session;
     }
   },
+  secret: process.env.JWT_SECRET,
   pages: {
     signIn: '/login',
   },
