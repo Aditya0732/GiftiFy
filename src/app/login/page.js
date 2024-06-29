@@ -182,7 +182,7 @@ export default function Login() {
             transition={{ delay: 0.6, duration: 0.5 }}
           >
             <p className="mt-2 text-sm text-gray-600">
-              Don't have an account?{' '}
+              Dont have an account?{' '}
               <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-300 ease-in-out">
                 Sign up
               </Link>
