@@ -144,7 +144,7 @@ const EventDetailsModal = ({ event, isOpen, onClose, currentUserId }) => {
                                             >
                                                 <div className="flex justify-between items-center mb-2">
                                                     <p className="text-lg font-medium text-gray-800">{contribution.contributor.name}</p>
-                                                    <p className="text-xl font-bold text-green-600">${contribution.amount.toFixed(2)}</p>
+                                                    <p className="text-xl font-bold text-green-600">₹{contribution.amount.toFixed(2)}</p>
                                                 </div>
                                                 <p className="text-gray-600">{contribution.contributor.email}</p>
                                                 <p className="text-gray-600">{formatDate(contribution.date)}</p>

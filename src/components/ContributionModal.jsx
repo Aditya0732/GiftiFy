@@ -95,7 +95,7 @@ export default function ContributionModal({ isOpen, onClose, event }) {
                                         <p className="text-sm text-gray-600">{guest.phone}</p>
                                         <p className="text-sm text-gray-600 mb-3">{guest.city}</p>
                                         <p className="text-lg font-bold text-green-600 mb-3">
-                                            Total Contribution: ${guest.totalContribution.toFixed(2)}
+                                            Total Contribution: ₹{guest.totalContribution.toFixed(2)}
                                         </p>
                                         {selectedGuest === guest._id ? (
                                             <div className="mt-2">
