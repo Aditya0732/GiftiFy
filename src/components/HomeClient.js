@@ -14,11 +14,13 @@ export default function HomeClient() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: events, isLoading: eventsLoading } = useGetEventsQuery();
+  const [shouldFetchEvents, setShouldFetchEvents] = useState(false);
+  const { data: events, isLoading: eventsLoading } = useGetEventsQuery(undefined, { skip: !shouldFetchEvents });
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
       localStorage.setItem('userId', session.user.id);
+      setShouldFetchEvents(true);
     } else if (status === 'unauthenticated') {
       router.push('/login');
     }

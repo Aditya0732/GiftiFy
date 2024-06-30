@@ -24,7 +24,8 @@ export default function Sidebar() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    await signOut();
+    localStorage.removeItem('userId');
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (

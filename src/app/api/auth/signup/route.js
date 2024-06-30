@@ -6,15 +6,15 @@ export async function POST(request) {
   await dbConnect();
 
   const { name, email, password, phone, city } = await request.json();
-
+  console.log("data :",name, email, password, phone, city);
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-
-    if (existingUser && existingUser.registered === true) {
+    console.log("found",existingUser);
+    if (existingUser && existingUser.registered === 'true') {
       return NextResponse.json({ message: 'User already exists' }, { status: 400 });
     }
 
-    if (existingUser && existingUser.registered !== true) {
+    if (existingUser && existingUser.registered !== 'true') {
       existingUser.name = name;
       existingUser.email = email;
       existingUser.password = password;

@@ -41,26 +41,26 @@ export async function POST(req) {
 
     await newEvent.save();
 
-    for (const guest of guestUsers) {
-      const emailHtml = render(
-        <EventInvitation
-          eventName={name}
-          eventDate={date}
-          eventVenue={venue}
-          recipientName={guest.name}
-          isRegistered={guest.registered}
-          registrationUrl="https://giftify-eta.vercel.app"
-        />
-      );
-      console.log("mail:",guest.email);
-      const response = await resend.emails.send({
-        from: 'Giftify <noreply@aditya.domain.com>',
-        to: guest.email,
-        subject: `You're invited to ${name}! 🎉`,
-        html: emailHtml,
-      });
-      console.log("resend response",response);
-    }
+    // for (const guest of guestUsers) {
+    //   const emailHtml = render(
+    //     <EventInvitation
+    //       eventName={name}
+    //       eventDate={date}
+    //       eventVenue={venue}
+    //       recipientName={guest.name}
+    //       isRegistered={guest.registered}
+    //       registrationUrl="https://giftify-eta.vercel.app"
+    //     />
+    //   );
+    //   console.log("mail:",guest.email);
+    //   const response = await resend.emails.send({
+    //     from: 'Giftify <noreply@aditya.domain.com>',
+    //     to: guest.email,
+    //     subject: `You're invited to ${name}! 🎉`,
+    //     html: emailHtml,
+    //   });
+    //   console.log("resend response",response);
+    // }
 
     return NextResponse.json({ message: 'Event created successfully and invitations sent', event: newEvent }, { status: 201 });
   } catch (error) {

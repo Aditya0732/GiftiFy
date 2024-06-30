@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { IoClose, IoCalendarOutline, IoLocationOutline, IoPersonAddOutline, IoMailOutline, IoCallOutline, IoHomeOutline, IoAddCircleOutline, IoAlertCircleOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from 'framer-motion';
 import useToast from '@/hooks/useToast';
+import emailjs from '@emailjs/browser';
 
 export default function EventForm({ isOpen, onClose }) {
   const [eventData, setEventData] = useState({
@@ -23,6 +24,7 @@ export default function EventForm({ isOpen, onClose }) {
   const { data: searchResults, isFetching } = useSearchUserQuery(searchTerm, { skip: searchTerm.length < 3 });
   const [showDropdown, setShowDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSendingEmails, setIsSendingEmails] = useState(false);
   const { showSuccessToast } = useToast();
 
   const debouncedSearch = debounce((term) => {
@@ -80,20 +82,70 @@ export default function EventForm({ isOpen, onClose }) {
     setEventData({ ...eventData, guests: updatedGuests });
   };
 
+  const sendInvitationEmail = async (guest, eventDetails) => {
+    const templateParams = {
+      recipientName: guest.name,
+      eventName: eventDetails.name,
+      eventDate: eventDetails.date,
+      eventVenue: eventDetails.venue,
+      registrationUrl: `https://giftify-eta.vercel.app/`,
+      to_Email: guest.email,
+    };
+
+    try {
+      const data = await emailjs.send(
+        "service_bknsntk",
+        "template_bybb4ei",
+        templateParams,
+        "-Ye-xAONr3oGPpTct",
+      );
+      console.log(data);
+      console.log(`Email sent successfully to ${guest.email}`);
+    } catch (error) {
+      console.error(`Failed to send email to ${guest.email}:`, error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSendingEmails(true);
     try {
       const data = await createEvent({
         ...eventData,
         host: session.user.id
       }).unwrap();
-      
+
+      for (const guest of eventData.guests) {
+        await sendInvitationEmail(guest, eventData);
+      }
       onClose();
-      showSuccessToast("Event created successfully!");
+      resetForm();
+      showSuccessToast("Event created successfully and invitations sent!");
     } catch (error) {
       console.error('Failed to create event:', error);
+    } finally {
+      setIsSendingEmails(false);
     }
   };
+
+  const resetForm = () => {
+    setEventData({
+      name: '',
+      date: '',
+      venue: '',
+      guests: []
+    });
+    setGuestInput({ name: '', email: '', phone: '', city: '' });
+    setSearchTerm('');
+    setShowDropdown(false);
+    setErrorMessage('');
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -128,7 +180,10 @@ export default function EventForm({ isOpen, onClose }) {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={onClose}
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <IoClose size={28} />
@@ -182,7 +237,7 @@ export default function EventForm({ isOpen, onClose }) {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg text-gray-700">Add Guests</h3>
             <p className="text-sm text-gray-600">Enter email or phone number of existing users to get their details</p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 sm:flex-row flex-col ">
               <div className="relative flex-1">
                 <input
                   type="text"
@@ -239,17 +294,17 @@ export default function EventForm({ isOpen, onClose }) {
               </motion.button>
             </div>
             {errorMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <IoAlertCircleOutline size={20} className="mr-2" />
-              <span className="block sm:inline">{errorMessage}</span>
-            </motion.div>
-          )}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <IoAlertCircleOutline size={20} className="mr-2" />
+                <span className="block sm:inline">{errorMessage}</span>
+              </motion.div>
+            )}
             <AnimatePresence>
               {showDropdown && searchResults && searchResults.length > 0 && (
                 <motion.div
@@ -307,9 +362,23 @@ export default function EventForm({ isOpen, onClose }) {
             type="submit"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-md hover:from-indigo-700 hover:to-purple-700 transition-colors text-lg font-semibold"
+            disabled={isLoading || isSendingEmails}
+            className={`w-full bg-gradient-to-r ${isLoading || isSendingEmails
+              ? 'from-gray-400 to-gray-500 cursor-not-allowed'
+              : 'from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+              } text-white py-3 rounded-md transition-colors text-lg font-semibold`}
           >
-            Create Event
+            {isLoading || isSendingEmails ? (
+              <div className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Event...
+              </div>
+            ) : (
+              'Create Event'
+            )}
           </motion.button>
         </form>
       </motion.div>
