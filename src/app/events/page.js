@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 import { useAddContributionMutation, useGetEventsQuery } from '@/store/api';
 import ContributionModal from '@/components/ContributionModal';
 import NoEventComponent from '@/components/NoEventComponent';
+import ToasterProvider from '@/components/ToasterProvider';
+import useToast from '@/hooks/useToast';
 
 const AllEvents = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -25,6 +27,7 @@ const AllEvents = () => {
   const [addContribution] = useAddContributionMutation();
   const { data: events, isLoading: eventsLoading } = useGetEventsQuery();
   const [isContributionModalOpen, setIsContributionModalOpen] = useState(false);
+  const { showSuccessToast } = useToast();
 
   const isUserHost = (event) => event.host._id === session?.user?.id;
 
@@ -102,6 +105,7 @@ const AllEvents = () => {
           paymentId
         }
       }).unwrap();
+      showSuccessToast("Money sent successfully!");
       setIsSendMoneyModalOpen(false);
     } catch (error) {
       console.error('Error adding contribution:', error);
@@ -353,7 +357,7 @@ const AllEvents = () => {
           })}
         </div>
       ) : (
-        <NoEventComponent/>
+        <NoEventComponent />
       )}
 
       {totalPages > 0 && (

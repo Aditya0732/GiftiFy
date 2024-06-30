@@ -123,7 +123,7 @@ export default function Navbar({ className }) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link href={item.path}>
+                <Link href={item.path} onClick={() => setIsMobileMenuOpen(false)}>
                   <div className="px-4 py-3 hover:bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 transition-all duration-300 ease-in-out flex items-center space-x-3">
                     <item.icon className="h-5 w-5 text-indigo-600" />
                     <span className="font-semibold text-gray-700 hover:text-indigo-600">{item.name}</span>

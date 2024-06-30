@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useGetUserDashboardDataQuery } from '@/store/api';
 import { IoGiftOutline, IoWalletOutline, IoPeopleOutline, IoCalendarOutline, IoPersonOutline, IoCashOutline, IoStarOutline, IoTrophyOutline, IoInformationCircleOutline } from 'react-icons/io5';
+import InfoCard from '@/components/InfoCard';
+import { tabInfo } from '@/constants/constants';
+import RankingCard from '@/components/RankingCard';
+import NoDataCard from '@/components/NoDataCard';
 
 const DynamicDashboard = () => {
     const { data: session } = useSession();
@@ -84,6 +88,14 @@ const DynamicDashboard = () => {
             .map(([name, amount]) => ({ name, amount }));
     }, [dashboardData?.contributedGifts]);
 
+    const maxContributorAmount = useMemo(() => {
+        return topContributors.reduce((max, contributor) => Math.max(max, contributor.amount), 0);
+    }, [topContributors]);
+
+    const maxHostAmount = useMemo(() => {
+        return topHosts.reduce((max, host) => Math.max(max, host.amount), 0);
+    }, [topHosts]);
+
     const tabVariants = {
         inactive: {
             background: "linear-gradient(45deg, #e0e7ff, #c7d2fe)",
@@ -125,16 +137,6 @@ const DynamicDashboard = () => {
             </div>
         );
     }
-
-    const NoDataCard = ({ message }) => (
-        <motion.div
-            variants={itemVariants}
-            className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-        >
-            <IoInformationCircleOutline className="text-3xl text-blue-500 mr-3" />
-            <p className="text-lg text-gray-600">{message}</p>
-        </motion.div>
-    );
 
     return (
         <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-blue-100 text-gray-800">
@@ -178,6 +180,11 @@ const DynamicDashboard = () => {
                     exit="hidden"
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
+                    <InfoCard
+                        title={tabInfo[activeTab].title}
+                        description={tabInfo[activeTab].description}
+                        icon={tabInfo[activeTab].icon}
+                    />
                     {activeTab === 'received' && (
                         consolidatedReceivedContributions.length > 0 ? consolidatedReceivedContributions.map((event) => (
                             <motion.div
@@ -261,47 +268,27 @@ const DynamicDashboard = () => {
 
                     {activeTab === 'top contributors' && (
                         topContributors.length > 0 ? topContributors.map((contributor, index) => (
-                            <motion.div
+                            <RankingCard
                                 key={contributor.name}
-                                variants={itemVariants}
-                                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                            >
-                                <h3 className="text-xl font-bold mb-4 flex items-center">
-                                    <IoTrophyOutline className="mr-2 text-2xl text-yellow-500" />
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
-                                        #{index + 1} {contributor.name}
-                                    </span>
-                                </h3>
-                                <p className="text-lg flex items-center">
-                                    <IoCashOutline className="mr-2 text-xl text-green-500" />
-                                    <span className="font-semibold text-green-600">
-                                        Total: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(contributor.amount)}
-                                    </span>
-                                </p>
-                            </motion.div>
+                                rank={index + 1}
+                                name={contributor.name}
+                                amount={contributor.amount}
+                                isContributor={true}
+                                maxAmount={maxContributorAmount}
+                            />
                         )) : <NoDataCard message="No top contributors data available." />
                     )}
 
                     {activeTab === 'top hosts' && (
                         topHosts.length > 0 ? topHosts.map((host, index) => (
-                            <motion.div
+                            <RankingCard
                                 key={host.name}
-                                variants={itemVariants}
-                                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                            >
-                                <h3 className="text-xl font-bold mb-4 flex items-center">
-                                    <IoStarOutline className="mr-2 text-2xl text-yellow-500" />
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
-                                        #{index + 1} {host.name}
-                                    </span>
-                                </h3>
-                                <p className="text-lg flex items-center">
-                                    <IoCashOutline className="mr-2 text-xl text-green-500" />
-                                    <span className="font-semibold text-green-600">
-                                        Total: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(host.amount)}
-                                    </span>
-                                </p>
-                            </motion.div>
+                                rank={index + 1}
+                                name={host.name}
+                                amount={host.amount}
+                                isContributor={false}
+                                maxAmount={maxHostAmount}
+                            />
                         )) : <NoDataCard message="No top hosts data available." />
                     )}
                 </motion.div>
